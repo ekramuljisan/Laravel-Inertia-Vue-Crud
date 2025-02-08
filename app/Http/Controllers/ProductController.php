@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Http;
 
 class ProductController extends Controller
 {
-    /**
+   /**
      * Display a listing of the resource.
      */
     public function index()
@@ -72,31 +72,35 @@ class ProductController extends Controller
      * Show the form for editing the specified resource.
      */
     public function edit(Product $product)
-    {
-        return Inertia::render('Products/edit', ['product' => $product]);
-    }
+{
+    return Inertia::render('Products/edit', ['product' => $product]);
+}
 
     /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, Product $product)
     {
-          if($request->hasFile('image')){
+
+
+        if ($request->hasFile('image')) {
+
             $file = $request->file('image');
             $img_name = $file->getClientOriginalName();
-            $file->move(public_path('uploads/img'),$img_name);
+            $file->move(public_path('uploads/img'), $img_name);
 
-            Product::where('id', $id)->update([
+            // Delete old image if exists
+            $old_image = public_path('uploads/img/' . $product->image);
+            if (file_exists($old_image)) {
+                File::delete($old_image);
+            }
+            $product->update([
                 'name' => $request->name,
                 'price' => $request->price,
                 'image' => $img_name,
             ]);
-            $old_image = 'uploads/img/' . $product->image;
-            File::delete($old_image);
-
-
-        }else{
-            Product::where('id', $id)->update([
+        } else {
+            $product->update([
                 'name' => $request->name,
                 'price' => $request->price,
             ]);
@@ -104,7 +108,6 @@ class ProductController extends Controller
 
         return redirect()->route('products.index');
     }
-
     /**
      * Remove the specified resource from storage.
      */
